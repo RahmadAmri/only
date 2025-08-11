@@ -4,8 +4,8 @@
   margin: 0 auto;
   padding: 170px 80px 104px;
   position: relative;
-  background: #F4F5F9;
-  font-family: 'PT Sans', sans-serif;
+  background: #f4f5f9;
+  font-family: "PT Sans", sans-serif;
 }
 
 .container {
@@ -29,7 +29,7 @@
 .gradientLine {
   width: 5px;
   height: 120px;
-  background: linear-gradient(180deg, #3877EE 0%, #EF5DA8 100%);
+  background: linear-gradient(180deg, #3877ee 0%, #ef5da8 100%);
   margin-top: 20px;
 }
 
@@ -37,7 +37,7 @@
   font-size: 56px;
   font-weight: 700;
   line-height: 67.2px;
-  color: #42567A;
+  color: #42567a;
   margin: 0;
 }
 
@@ -56,19 +56,19 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #F4F5F9;
+  background: #f4f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
   font-weight: 400;
-  color: #42567A;
+  color: #42567a;
 }
 
 .categoryText {
   font-size: 20px;
   font-weight: 400;
-  color: #42567A;
+  color: #42567a;
   white-space: nowrap;
 }
 
@@ -104,27 +104,29 @@
   height: 56px;
   border-radius: 50%;
   border: 1px solid rgba(66, 86, 122, 0.2);
-  background: #F4F5F9;
+  background: #f4f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
   transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
 
   &:hover {
     background: #fff;
-    border-color: #42567A;
+    border-color: #42567a;
   }
 
   &.active {
-    background: #F4F5F9;
-    border-color: #42567A;
-    
+    background: #f4f5f9;
+    border-color: #42567a;
+
     .circleButtonNumber {
       display: none;
     }
-    
+
     .circleButtonText {
       display: block;
     }
@@ -134,14 +136,14 @@
 .circleButtonNumber {
   font-size: 20px;
   font-weight: 400;
-  color: #42567A;
+  color: #42567a;
   display: block;
 }
 
 .circleButtonText {
   font-size: 20px;
   font-weight: 400;
-  color: #42567A;
+  color: #42567a;
   display: none;
   white-space: nowrap;
   transform: rotate(0deg);
@@ -164,11 +166,11 @@
   letter-spacing: -0.02em;
 
   &.yearStart {
-    color: #5D5FEF;
+    color: #5d5fef;
   }
 
   &.yearEnd {
-    color: #EF5DA8;
+    color: #ef5da8;
   }
 }
 
@@ -184,7 +186,7 @@
   align-items: center;
   gap: 5px;
   font-size: 14px;
-  color: #42567A;
+  color: #42567a;
 }
 
 .paginationCurrent {
@@ -216,10 +218,10 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #42567A;
+  color: #42567a;
 
   &:hover:not(:disabled) {
-    background: #42567A;
+    background: #42567a;
     color: #fff;
   }
 
@@ -233,9 +235,88 @@
   position: relative;
 }
 
+/* Event pagination (below timeline) */
+.eventPaginationWrapper {
+  margin-top: 40px;
+  position: relative;
+}
+
+.eventList {
+  display: flex;
+  gap: 80px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.eventItem {
+  width: 320px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  opacity: 0;
+}
+
+.eventYearInline {
+  @extend .eventYear;
+  font-weight: 700;
+}
+
+.eventNavSmall,
+.eventNavSmallPrev {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(66, 86, 122, 0.3);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #42567a;
+  transition: all 0.3s ease;
+}
+.eventNavSmall {
+  right: -70px;
+}
+.eventNavSmallPrev {
+  left: -70px;
+}
+.eventNavSmall:hover:not(:disabled),
+.eventNavSmallPrev:hover:not(:disabled) {
+  background: #42567a;
+  color: #fff;
+}
+.eventNavSmall:disabled,
+.eventNavSmallPrev:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.eventPageIndicators {
+  display: flex;
+  gap: 8px;
+  margin-top: 32px;
+}
+.eventDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(66, 86, 122, 0.25);
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.eventDot.active {
+  background: #42567a;
+  transform: scale(1.3);
+}
+
 .swiper {
   overflow: visible;
-  
+
   :global(.swiper-slide) {
     width: auto;
     max-width: 320px;
@@ -262,14 +343,14 @@
 .eventYear {
   font-size: 25px;
   font-weight: 400;
-  color: #5D5FEF;
+  color: #5d5fef;
   line-height: 30px;
 }
 
 .eventTitle {
   font-size: 25px;
   font-weight: 400;
-  color: #42567A;
+  color: #42567a;
   line-height: 30px;
   margin: 0;
 }
@@ -277,7 +358,7 @@
 .eventDescription {
   font-size: 20px;
   font-weight: 400;
-  color: #42567A;
+  color: #42567a;
   line-height: 30px;
   margin: 0;
   opacity: 0.8;
@@ -302,6 +383,18 @@
   .year {
     font-size: 180px;
     line-height: 144px;
+  }
+
+  .eventList {
+    gap: 40px;
+  }
+  .eventItem {
+    width: 260px;
+    max-width: 260px;
+  }
+  .eventNavSmall,
+  .eventNavSmallPrev {
+    display: none;
   }
 }
 
@@ -351,5 +444,17 @@
   .circleButtonNumber,
   .circleButtonText {
     font-size: 16px;
+  }
+
+  .eventList {
+    flex-direction: column;
+    gap: 32px;
+  }
+  .eventItem {
+    width: 100%;
+    max-width: 100%;
+  }
+  .eventPageIndicators {
+    justify-content: center;
   }
 }

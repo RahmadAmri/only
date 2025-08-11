@@ -202,9 +202,15 @@ export default function HistoricalTimeline() {
   const circleRef = useRef<HTMLDivElement>(null);
   const prevBtnRef = useRef<HTMLButtonElement>(null);
   const nextBtnRef = useRef<HTMLButtonElement>(null);
+  const eventsWrapperRef = useRef<HTMLDivElement>(null);
+  const [eventPage, setEventPage] = useState(0);
 
   const currentPeriod = timelineData[activePeriod];
   const totalPeriods = timelineData.length;
+
+  const circleDiameter = 530;
+  const buttonSize = 56;
+  const radius = circleDiameter / 2 - buttonSize / 2;
 
   const layoutButtons = (activeIndex: number, animate = false) => {
     if (!circleRef.current) return;
@@ -212,7 +218,6 @@ export default function HistoricalTimeline() {
       `.${styles.circleButton}`
     );
     const total = totalPeriods;
-    const radius = 265;
     buttons.forEach((button, i) => {
       const relative = (i - activeIndex + total) % total; // active goes to top
       const angle = (360 / total) * relative - 90; // -90 so active at top
@@ -251,10 +256,8 @@ export default function HistoricalTimeline() {
         ease: "back.out(1.6)",
       }
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Animate years on change
   useEffect(() => {
     if (!yearsRef.current) return;
     setIsAnimating(true);
@@ -271,6 +274,47 @@ export default function HistoricalTimeline() {
         onComplete: () => setIsAnimating(false),
       }
     );
+  }, [activePeriod]);
+
+  useEffect(() => {
+    if (!eventsWrapperRef.current) return;
+    const items = eventsWrapperRef.current.querySelectorAll(
+      `.${styles.eventItem}`
+    );
+    gsap.fromTo(
+      items,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: 0.6, stagger: 0.15, ease: "power2.out" }
+    );
+  }, [activePeriod, eventPage]);
+
+  const computeItemsPerPage = () => {
+    if (typeof window === "undefined") return 4;
+    if (window.innerWidth < 640) return 1;
+    if (window.innerWidth < 1024) return 2;
+    if (window.innerWidth < 1280) return 3;
+    return 4;
+  };
+  const [itemsPerPage, setItemsPerPage] = useState<number>(
+    computeItemsPerPage()
+  );
+  useEffect(() => {
+    const onResize = () => setItemsPerPage(computeItemsPerPage());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const pages = Math.ceil(currentPeriod.events.length / itemsPerPage);
+  const pagedEvents = currentPeriod.events.slice(
+    eventPage * itemsPerPage,
+    eventPage * itemsPerPage + itemsPerPage
+  );
+
+  const nextEventsPage = () => setEventPage((p) => (p + 1) % pages);
+  const prevEventsPage = () => setEventPage((p) => (p - 1 + pages) % pages);
+
+  useEffect(() => {
+    setEventPage(0);
   }, [activePeriod]);
 
   const handlePeriodChange = (index: number) => {
@@ -419,17 +463,16 @@ export default function HistoricalTimeline() {
             spaceBetween={80}
             slidesPerView={"auto"}
             onBeforeInit={(swiper) => {
-              // Provide navigation elements after refs available
               // @ts-expect-error Swiper types don't know about dynamic assignment before init
               swiper.params.navigation.prevEl = prevBtnRef.current;
-              // @ts-expect-error Swiper types don't know about dynamic assignment before init
+              // @ts-expect-error Swiper types don't знают о динамическом назначении до инициализации
               swiper.params.navigation.nextEl = nextBtnRef.current;
             }}
             navigation={{
               prevEl: prevBtnRef.current,
               nextEl: nextBtnRef.current,
             }}
-            key={activePeriod} // re-init when period changes
+            key={activePeriod}
             className={styles.swiper}
           >
             {currentPeriod.events.map((event, i) => (
@@ -445,6 +488,58 @@ export default function HistoricalTimeline() {
               </SwiperSlide>
             ))}
           </Swiper>
+        </div>
+
+        {/* Events (custom pagination) */}
+        <div className={styles.eventPaginationWrapper}>
+          <div className={styles.eventList} ref={eventsWrapperRef}>
+            <button
+              className={styles.eventNavSmallPrev}
+              onClick={prevEventsPage}
+              disabled={pages <= 1}
+              aria-label="Предыдущие события"
+            >
+              <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+                <path
+                  d="M8.5.75 2.25 7 8.5 13.25"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+              </svg>
+            </button>
+            {pagedEvents.map((ev) => (
+              <div key={ev.year + ev.title} className={styles.eventItem}>
+                <div className={styles.eventYear}>{ev.year}</div>
+                <h3 className={styles.eventTitle}>{ev.title}</h3>
+                <p className={styles.eventDescription}>{ev.description}</p>
+              </div>
+            ))}
+            <button
+              className={styles.eventNavSmall}
+              onClick={nextEventsPage}
+              disabled={pages <= 1}
+              aria-label="Следующие события"
+            >
+              <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
+                <path
+                  d="M1.5.75 7.75 7 1.5 13.25"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+              </svg>
+            </button>
+          </div>
+          <div className={styles.eventPageIndicators}>
+            {Array.from({ length: pages }).map((_, i) => (
+              <span
+                key={i}
+                className={`${styles.eventDot} ${
+                  i === eventPage ? "active" : ""
+                }`}
+                onClick={() => setEventPage(i)}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
