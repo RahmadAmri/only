@@ -498,7 +498,47 @@
   right: 0;
 }
 
-/* Smaller gaps responsively */
+.periodNav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.periodCounter {
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 400;
+  color: #42567a;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.periodArrows {
+  display: flex;
+  gap: 20px;
+}
+
+.periodArrows .navButton {
+  width: 56px;
+  height: 56px;
+  margin: 0;
+}
+
+.controls {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .periodNav {
+    gap: 12px;
+  }
+  .periodArrows {
+    gap: 12px;
+  }
+}
+
 @media (max-width: 1200px) {
   .eventTrack {
     gap: 40px;

@@ -428,9 +428,9 @@ export default function HistoricalTimeline() {
           </div>
         </div>
 
-        {/* Period nav */}
-        <div className={styles.controls}>
-          <div className={styles.pagination}>
+        {/* Period nav (counter with arrows directly beneath, like screenshot) */}
+        <div className={styles.periodNav}>
+          <div className={styles.periodCounter}>
             <span className={styles.paginationCurrent}>
               {String(activePeriod + 1).padStart(2, "0")}
             </span>
@@ -439,7 +439,7 @@ export default function HistoricalTimeline() {
               {String(totalPeriods).padStart(2, "0")}
             </span>
           </div>
-          <div className={styles.nav}>
+          <div className={styles.periodArrows}>
             <button
               ref={prevBtnRef}
               className={styles.navButton}
