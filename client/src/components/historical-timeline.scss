@@ -1,0 +1,358 @@
+.historical-timeline {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 170px 80px 104px;
+  position: relative;
+  background: #F4F5F9;
+  font-family: 'PT Sans', sans-serif;
+
+  &__container {
+    position: relative;
+    width: 100%;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 56px;
+  }
+
+  &__title-block {
+    display: flex;
+    align-items: flex-start;
+    gap: 78px;
+  }
+
+  &__gradient-line {
+    width: 5px;
+    height: 120px;
+    background: linear-gradient(180deg, #3877EE 0%, #EF5DA8 100%);
+    margin-top: 20px;
+  }
+
+  &__title {
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 67.2px;
+    color: #42567A;
+    margin: 0;
+  }
+
+  &__category {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 20px 20px 0;
+    border: 1px solid rgba(66, 86, 122, 0.1);
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.5);
+    min-width: 120px;
+  }
+
+  &__category-number {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #F4F5F9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: #42567A;
+  }
+
+  &__category-text {
+    font-size: 20px;
+    font-weight: 400;
+    color: #42567A;
+    white-space: nowrap;
+  }
+
+  &__circle-container {
+    position: relative;
+    width: 530px;
+    height: 530px;
+    margin: 0 auto 56px;
+  }
+
+  &__circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-origin: center center;
+  }
+
+  &__circle-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(66, 86, 122, 0.2);
+    border-radius: 50%;
+  }
+
+  .timeline-circle__button {
+    position: absolute;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(66, 86, 122, 0.2);
+    background: #F4F5F9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: translate(-50%, -50%);
+
+    &:hover {
+      background: #fff;
+      border-color: #42567A;
+    }
+
+    &.active {
+      background: #F4F5F9;
+      border-color: #42567A;
+      
+      .timeline-circle__button-number {
+        display: none;
+      }
+      
+      .timeline-circle__button-text {
+        display: block;
+      }
+    }
+  }
+
+  .timeline-circle__button-number {
+    font-size: 20px;
+    font-weight: 400;
+    color: #42567A;
+    display: block;
+  }
+
+  .timeline-circle__button-text {
+    font-size: 20px;
+    font-weight: 400;
+    color: #42567A;
+    display: none;
+    white-space: nowrap;
+    transform: rotate(0deg);
+  }
+
+  &__years {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 100px;
+    align-items: center;
+  }
+
+  &__year {
+    font-size: 200px;
+    font-weight: 700;
+    line-height: 160px;
+    letter-spacing: -0.02em;
+
+    &--start {
+      color: #5D5FEF;
+    }
+
+    &--end {
+      color: #EF5DA8;
+    }
+  }
+
+  &__controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 56px;
+  }
+
+  &__pagination {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: #42567A;
+  }
+
+  &__pagination-current {
+    font-weight: 400;
+  }
+
+  &__pagination-separator {
+    font-weight: 400;
+  }
+
+  &__pagination-total {
+    font-weight: 400;
+    opacity: 0.5;
+  }
+
+  &__nav {
+    display: flex;
+    gap: 20px;
+  }
+
+  &__nav-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid rgba(66, 86, 122, 0.5);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #42567A;
+
+    &:hover:not(:disabled) {
+      background: #42567A;
+      color: #fff;
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+
+  &__events {
+    position: relative;
+  }
+
+  &__swiper {
+    overflow: visible;
+    
+    .swiper-slide {
+      width: auto;
+      max-width: 320px;
+    }
+  }
+
+  &__slide {
+    width: 320px;
+  }
+
+  &__event {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  &__event-year {
+    font-size: 25px;
+    font-weight: 400;
+    color: #5D5FEF;
+    line-height: 30px;
+  }
+
+  &__event-title {
+    font-size: 25px;
+    font-weight: 400;
+    color: #42567A;
+    line-height: 30px;
+    margin: 0;
+  }
+
+  &__event-description {
+    font-size: 20px;
+    font-weight: 400;
+    color: #42567A;
+    line-height: 30px;
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  // Responsive design
+  @media (max-width: 1200px) {
+    padding: 120px 40px 80px;
+
+    &__title {
+      font-size: 48px;
+      line-height: 57.6px;
+    }
+
+    &__circle-container {
+      width: 480px;
+      height: 480px;
+    }
+
+    &__year {
+      font-size: 180px;
+      line-height: 144px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 80px 20px 60px;
+
+    &__header {
+      flex-direction: column;
+      gap: 40px;
+      align-items: flex-start;
+    }
+
+    &__title-block {
+      gap: 40px;
+    }
+
+    &__title {
+      font-size: 36px;
+      line-height: 43.2px;
+    }
+
+    &__circle-container {
+      width: 320px;
+      height: 320px;
+    }
+
+    &__year {
+      font-size: 120px;
+      line-height: 96px;
+      gap: 60px;
+    }
+
+    &__years {
+      gap: 60px;
+    }
+
+    &__slide {
+      width: 280px;
+    }
+
+    .timeline-circle__button {
+      width: 40px;
+      height: 40px;
+    }
+
+    .timeline-circle__button-number,
+    .timeline-circle__button-text {
+      font-size: 16px;
+    }
+  }
+}
+
+// Swiper overrides
+.historical-timeline__swiper {
+  .swiper-slide {
+    opacity: 0.6;
+    transition: opacity 0.3s ease;
+
+    &.swiper-slide-active,
+    &.swiper-slide-next {
+      opacity: 1;
+    }
+  }
+}
