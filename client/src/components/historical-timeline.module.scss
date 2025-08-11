@@ -109,44 +109,112 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
   transform: translate(-50%, -50%);
   left: 50%;
   top: 50%;
+  overflow: visible;
+  padding: 0;
+  transition: border-color 0.35s ease, background 0.35s ease,
+    box-shadow 0.35s ease;
 
-  &:hover {
-    background: #fff;
-    border-color: #42567a;
+  /* Dot (initial state) */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #42567a;
+    transition: transform 0.35s ease, opacity 0.25s ease;
   }
 
+  /* Hide big circle visuals until hover/active */
+  border-color: transparent;
+  background: transparent;
+
+  /* Number + label hidden initially */
+  .circleButtonNumber,
+  .circleButtonLabel {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.4);
+    transition: opacity 0.3s ease,
+      transform 0.35s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-origin: left center;
+  }
+
+  /* Hover (non-active) reveals number, morphs dot */
+  &:hover,
+  &:focus-visible {
+    background: #f4f5f9;
+    border-color: rgba(66, 86, 122, 0.25);
+
+    &::before {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+
+    .circleButtonNumber {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+  }
+
+  /* Active (selected) state shows number + label */
   &.active {
     background: #f4f5f9;
     border-color: #42567a;
 
-    .circleButtonNumber {
-      display: none;
+    &::before {
+      opacity: 0;
+      transform: scale(0.2);
     }
 
-    .circleButtonText {
-      display: block;
+    .circleButtonNumber {
+      opacity: 1;
+      transform: translateY(-50%) scale(1);
+    }
+
+    .circleButtonLabel {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0) scale(1);
     }
   }
 }
 
 .circleButtonNumber {
+  position: relative;
   font-size: 20px;
-  font-weight: 400;
+  font-weight: 500;
   color: #42567a;
-  display: block;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
 }
 
-.circleButtonText {
-  font-size: 20px;
-  font-weight: 400;
-  color: #42567a;
-  display: none;
+.circleButtonLabel {
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 12px);
+  transform: translateY(-50%) translateX(6px) scale(0.9);
   white-space: nowrap;
-  transform: rotate(0deg);
+  font-size: 18px;
+  font-weight: 600;
+  color: #42567a;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .circleButton,
+  .circleButton::before,
+  .circleButtonNumber,
+  .circleButtonLabel {
+    transition: none !important;
+  }
 }
 
 .years {

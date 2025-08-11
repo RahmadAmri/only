@@ -359,42 +359,24 @@ export default function HistoricalTimeline() {
 
         {/* Circle */}
         <div className={styles.circleContainer}>
-          <div className={styles.circle} ref={circleRef}>
+          <div ref={circleRef} className={styles.circle}>
             <div className={styles.circleBorder} />
-            {/* crosshair lines */}
-            <div
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: 0,
-                width: "100%",
-                height: 1,
-                background: "rgba(66,86,122,0.15)",
-                transform: "translateY(-50%)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: 0,
-                height: "100%",
-                width: 1,
-                background: "rgba(66,86,122,0.15)",
-                transform: "translateX(-50%)",
-              }}
-            />
-            {timelineData.map((period, index) => (
+            {timelineData.map((period, i) => (
               <button
                 key={period.id}
                 className={`${styles.circleButton} ${
-                  index === activePeriod ? "active" : ""
+                  i === activePeriod ? styles.active : ""
                 }`}
-                onClick={() => handlePeriodChange(index)}
-                aria-label={`Период ${period.category}`}
+                aria-label={`${i + 1}. ${period.category}`}
+                onClick={() => handlePeriodChange(i)}
               >
-                <span className={styles.circleButtonNumber}>{index + 1}</span>
-                <span className={styles.circleButtonText}>
+                <span
+                  className={styles.circleButtonNumber}
+                  style={{ top: "50%", position: "absolute" }}
+                >
+                  {i + 1}
+                </span>
+                <span className={styles.circleButtonLabel}>
                   {period.category}
                 </span>
               </button>
