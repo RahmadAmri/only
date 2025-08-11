@@ -1,11 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { gsap } from "gsap";
-import "swiper/css";
-import "swiper/css/navigation";
 import styles from "./historical-timeline.module.scss";
 
 interface TimelineEvent {
@@ -13,7 +9,6 @@ interface TimelineEvent {
   title: string;
   description: string;
 }
-
 interface TimePeriod {
   id: number;
   category: string;
@@ -198,16 +193,21 @@ const timelineData: TimePeriod[] = [
 export default function HistoricalTimeline() {
   const [activePeriod, setActivePeriod] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+
   const yearsRef = useRef<HTMLDivElement>(null);
   const circleRef = useRef<HTMLDivElement>(null);
   const prevBtnRef = useRef<HTMLButtonElement>(null);
   const nextBtnRef = useRef<HTMLButtonElement>(null);
-  const eventsWrapperRef = useRef<HTMLDivElement>(null);
-  const [eventPage, setEventPage] = useState(0);
+
+  // Horizontal scroll refs / state
+  const eventScrollRef = useRef<HTMLDivElement | null>(null);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
 
   const currentPeriod = timelineData[activePeriod];
   const totalPeriods = timelineData.length;
 
+  // Circle layout
   const circleDiameter = 530;
   const buttonSize = 56;
   const radius = circleDiameter / 2 - buttonSize / 2;
@@ -219,8 +219,8 @@ export default function HistoricalTimeline() {
     );
     const total = totalPeriods;
     buttons.forEach((button, i) => {
-      const relative = (i - activeIndex + total) % total; // active goes to top
-      const angle = (360 / total) * relative - 90; // -90 so active at top
+      const relative = (i - activeIndex + total) % total;
+      const angle = (360 / total) * relative - 90;
       const x = Math.cos((angle * Math.PI) / 180) * radius;
       const y = Math.sin((angle * Math.PI) / 180) * radius;
       if (animate) {
@@ -228,17 +228,10 @@ export default function HistoricalTimeline() {
       } else {
         gsap.set(button, { x, y });
       }
-      // counter-rotate text to keep horizontal only for category text
-      const textEl = (button as HTMLElement).querySelector(
-        `.${styles.circleButtonText}`
-      );
-      if (textEl) {
-        gsap.set(textEl, { rotation: -0 }); // ensure reset
-      }
     });
   };
 
-  // Position buttons on circle (initial)
+  // Initial circle buttons
   useEffect(() => {
     layoutButtons(activePeriod, false);
     if (!circleRef.current) return;
@@ -258,6 +251,7 @@ export default function HistoricalTimeline() {
     );
   }, []);
 
+  // Animate years on period change
   useEffect(() => {
     if (!yearsRef.current) return;
     setIsAnimating(true);
@@ -276,63 +270,105 @@ export default function HistoricalTimeline() {
     );
   }, [activePeriod]);
 
+  // Animate events list & reset scroll when period changes
   useEffect(() => {
-    if (!eventsWrapperRef.current) return;
-    const items = eventsWrapperRef.current.querySelectorAll(
-      `.${styles.eventItem}`
-    );
+    const el = eventScrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: 0 });
+    const cards = el.querySelectorAll(`.${styles.eventCard}`);
     gsap.fromTo(
-      items,
+      cards,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.6, stagger: 0.15, ease: "power2.out" }
     );
-  }, [activePeriod, eventPage]);
-
-  const computeItemsPerPage = () => {
-    if (typeof window === "undefined") return 4;
-    if (window.innerWidth < 640) return 1;
-    if (window.innerWidth < 1024) return 2;
-    if (window.innerWidth < 1280) return 3;
-    return 4;
-  };
-  const [itemsPerPage, setItemsPerPage] = useState<number>(
-    computeItemsPerPage()
-  );
-  useEffect(() => {
-    const onResize = () => setItemsPerPage(computeItemsPerPage());
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  const pages = Math.ceil(currentPeriod.events.length / itemsPerPage);
-  const pagedEvents = currentPeriod.events.slice(
-    eventPage * itemsPerPage,
-    eventPage * itemsPerPage + itemsPerPage
-  );
-
-  const nextEventsPage = () => setEventPage((p) => (p + 1) % pages);
-  const prevEventsPage = () => setEventPage((p) => (p - 1 + pages) % pages);
-
-  useEffect(() => {
-    setEventPage(0);
+    // Update arrow state after resetting scroll
+    requestAnimationFrame(() => updateEventArrows());
   }, [activePeriod]);
 
+  // Period change handlers
   const handlePeriodChange = (index: number) => {
     if (index === activePeriod || isAnimating) return;
     setActivePeriod(index);
     layoutButtons(index, true);
   };
-
-  const handlePrev = () => {
+  const handlePrev = () =>
     handlePeriodChange(
       activePeriod === 0 ? totalPeriods - 1 : activePeriod - 1
     );
-  };
-  const handleNext = () => {
+  const handleNext = () =>
     handlePeriodChange(
       activePeriod === totalPeriods - 1 ? 0 : activePeriod + 1
     );
+
+  // Horizontal scroll helpers
+  const updateEventArrows = useCallback(() => {
+    const el = eventScrollRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanScrollPrev(scrollLeft > 0);
+    setCanScrollNext(scrollLeft + clientWidth < scrollWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    updateEventArrows();
+    const el = eventScrollRef.current;
+    if (!el) return;
+    const onScroll = () => updateEventArrows();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updateEventArrows);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", updateEventArrows);
+    };
+  }, [updateEventArrows, activePeriod]);
+
+  const scrollAmount = () => {
+    const el = eventScrollRef.current;
+    if (!el) return 0;
+    return Math.min(el.clientWidth * 0.9, el.scrollWidth - el.clientWidth);
   };
+  const scrollNext = () => {
+    const el = eventScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: scrollAmount(), behavior: "smooth" });
+  };
+  const scrollPrev = () => {
+    const el = eventScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: -scrollAmount(), behavior: "smooth" });
+  };
+
+  // Drag / swipe (mouse)
+  useEffect(() => {
+    const el = eventScrollRef.current;
+    if (!el) return;
+    let isDown = false;
+    let startX = 0;
+    let startScroll = 0;
+    const down = (e: MouseEvent) => {
+      isDown = true;
+      startX = e.pageX;
+      startScroll = el.scrollLeft;
+      el.classList.add(styles.dragging);
+    };
+    const move = (e: MouseEvent) => {
+      if (!isDown) return;
+      const dx = e.pageX - startX;
+      el.scrollLeft = startScroll - dx;
+    };
+    const up = () => {
+      isDown = false;
+      el.classList.remove(styles.dragging);
+    };
+    el.addEventListener("mousedown", down);
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    return () => {
+      el.removeEventListener("mousedown", down);
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+    };
+  }, [activePeriod]);
 
   return (
     <section className={styles.historicalTimeline}>
@@ -382,7 +418,6 @@ export default function HistoricalTimeline() {
               </button>
             ))}
           </div>
-          {/* Years */}
           <div className={styles.years} ref={yearsRef}>
             <div className={`${styles.year} ${styles.yearStart}`}>
               {currentPeriod.startYear}
@@ -393,7 +428,7 @@ export default function HistoricalTimeline() {
           </div>
         </div>
 
-        {/* Controls */}
+        {/* Period nav */}
         <div className={styles.controls}>
           <div className={styles.pagination}>
             <span className={styles.paginationCurrent}>
@@ -407,7 +442,7 @@ export default function HistoricalTimeline() {
           <div className={styles.nav}>
             <button
               ref={prevBtnRef}
-              className={`${styles.navButton} timeline-prev`}
+              className={styles.navButton}
               onClick={handlePrev}
               disabled={isAnimating}
               aria-label="Предыдущий период"
@@ -422,7 +457,7 @@ export default function HistoricalTimeline() {
             </button>
             <button
               ref={nextBtnRef}
-              className={`${styles.navButton} timeline-next`}
+              className={styles.navButton}
               onClick={handleNext}
               disabled={isAnimating}
               aria-label="Следующий период"
@@ -438,48 +473,15 @@ export default function HistoricalTimeline() {
           </div>
         </div>
 
-        {/* Events */}
+        {/* Events horizontal scroll */}
         <div className={styles.events}>
-          <Swiper
-            modules={[Navigation]}
-            spaceBetween={80}
-            slidesPerView={"auto"}
-            onBeforeInit={(swiper) => {
-              // @ts-expect-error Swiper types don't know about dynamic assignment before init
-              swiper.params.navigation.prevEl = prevBtnRef.current;
-              // @ts-expect-error Swiper types don't знают о динамическом назначении до инициализации
-              swiper.params.navigation.nextEl = nextBtnRef.current;
-            }}
-            navigation={{
-              prevEl: prevBtnRef.current,
-              nextEl: nextBtnRef.current,
-            }}
-            key={activePeriod}
-            className={styles.swiper}
-          >
-            {currentPeriod.events.map((event, i) => (
-              <SwiperSlide
-                key={`${activePeriod}-${i}`}
-                className={styles.slide}
-              >
-                <div className={styles.event}>
-                  <div className={styles.eventYear}>{event.year}</div>
-                  <h3 className={styles.eventTitle}>{event.title}</h3>
-                  <p className={styles.eventDescription}>{event.description}</p>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-
-        {/* Events (custom pagination) */}
-        <div className={styles.eventPaginationWrapper}>
-          <div className={styles.eventList} ref={eventsWrapperRef}>
+          <div className={styles.eventScrollWrapper}>
             <button
-              className={styles.eventNavSmallPrev}
-              onClick={prevEventsPage}
-              disabled={pages <= 1}
-              aria-label="Предыдущие события"
+              type="button"
+              className={`${styles.eventArrow} ${styles.eventArrowPrev}`}
+              onClick={scrollPrev}
+              disabled={!canScrollPrev}
+              aria-label="Назад"
             >
               <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
                 <path
@@ -489,18 +491,37 @@ export default function HistoricalTimeline() {
                 />
               </svg>
             </button>
-            {pagedEvents.map((ev) => (
-              <div key={ev.year + ev.title} className={styles.eventItem}>
-                <div className={styles.eventYear}>{ev.year}</div>
-                <h3 className={styles.eventTitle}>{ev.title}</h3>
-                <p className={styles.eventDescription}>{ev.description}</p>
+
+            <div
+              ref={eventScrollRef}
+              className={styles.eventScroller}
+              role="list"
+            >
+              <div className={styles.eventTrack}>
+                {currentPeriod.events.map((ev) => (
+                  <div
+                    key={ev.year}
+                    className={styles.eventCard}
+                    role="listitem"
+                  >
+                    <div className={styles.eventYear}>{ev.year}</div>
+                    <h4 className={styles.eventTitle}>{ev.title}</h4>
+                    {ev.description && (
+                      <p className={styles.eventDescription}>
+                        {ev.description}
+                      </p>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
             <button
-              className={styles.eventNavSmall}
-              onClick={nextEventsPage}
-              disabled={pages <= 1}
-              aria-label="Следующие события"
+              type="button"
+              className={`${styles.eventArrow} ${styles.eventArrowNext}`}
+              onClick={scrollNext}
+              disabled={!canScrollNext}
+              aria-label="Вперед"
             >
               <svg width="10" height="14" viewBox="0 0 10 14" fill="none">
                 <path
@@ -510,17 +531,6 @@ export default function HistoricalTimeline() {
                 />
               </svg>
             </button>
-          </div>
-          <div className={styles.eventPageIndicators}>
-            {Array.from({ length: pages }).map((_, i) => (
-              <span
-                key={i}
-                className={`${styles.eventDot} ${
-                  i === eventPage ? "active" : ""
-                }`}
-                onClick={() => setEventPage(i)}
-              />
-            ))}
           </div>
         </div>
       </div>

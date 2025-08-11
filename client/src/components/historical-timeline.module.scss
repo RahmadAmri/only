@@ -161,7 +161,7 @@
     }
   }
 
-  /* Active (selected) state shows number + label */
+  /* Active (selected) tate shows number + label */
   &.active {
     background: #f4f5f9;
     border-color: #42567a;
@@ -432,7 +432,120 @@
   opacity: 0.8;
 }
 
-// Responsive design
+.eventScrollWrapper {
+  position: relative;
+  margin-top: 40px;
+  padding: 0 70px; /* space for arrows */
+}
+
+.eventScroller {
+  overflow: hidden;
+  width: 100%;
+  cursor: grab;
+}
+.eventScroller:active {
+  cursor: grabbing;
+}
+
+.eventTrack {
+  display: flex;
+  gap: 80px;
+  padding-bottom: 4px;
+  scroll-behavior: smooth;
+}
+
+.dragging .eventTrack {
+  scroll-behavior: auto;
+}
+
+.eventCard {
+  flex: 0 0 320px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.eventArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(66, 86, 122, 0.3);
+  background: #fff;
+  color: #42567a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, opacity 0.3s;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+.eventArrow:hover:not(:disabled) {
+  background: #42567a;
+  color: #fff;
+}
+.eventArrow:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+.eventArrowPrev {
+  left: 0;
+}
+.eventArrowNext {
+  right: 0;
+}
+
+/* Smaller gaps responsively */
+@media (max-width: 1200px) {
+  .eventTrack {
+    gap: 40px;
+  }
+  .eventCard {
+    flex-basis: 260px;
+    max-width: 260px;
+  }
+  .eventScrollWrapper {
+    padding: 0 56px;
+  }
+}
+@media (max-width: 900px) {
+  .eventTrack {
+    gap: 32px;
+  }
+  .eventCard {
+    flex-basis: 240px;
+    max-width: 240px;
+  }
+}
+@media (max-width: 768px) {
+  .eventScrollWrapper {
+    padding: 0 48px;
+  }
+  .eventCard {
+    flex-basis: 260px;
+  }
+}
+@media (max-width: 560px) {
+  .eventScrollWrapper {
+    padding: 0 40px;
+  }
+  .eventTrack {
+    gap: 24px;
+  }
+  .eventCard {
+    flex-basis: 280px;
+    max-width: 280px;
+  }
+  .eventArrow {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* Responsive design */
 @media (max-width: 1200px) {
   .historicalTimeline {
     padding: 120px 40px 80px;
